@@ -59,5 +59,4 @@ public class PatientService implements IPatientService {
 	public List<Patient> findByDoctorId(Integer id) {
 		return patientDAO.findByDoctorId(id);
 	}
-
 }

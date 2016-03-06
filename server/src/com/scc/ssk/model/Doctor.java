@@ -51,6 +51,9 @@ public class Doctor implements Serializable {
 	@Column(name = "profession")
 	private String profession;
 	
+	@Column(name = "doctorCode", unique = true)
+	private String code;
+	
 	@OneToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "Doctor_Schedule_idDoctor_Schedule")
 	private DoctorSchedule schedule;
@@ -105,5 +108,13 @@ public class Doctor implements Serializable {
 
 	public void setClinic(Clinic clinic) {
 		this.clinic = clinic;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
 	}
 }

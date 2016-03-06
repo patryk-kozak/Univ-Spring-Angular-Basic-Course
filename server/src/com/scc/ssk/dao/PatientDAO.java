@@ -45,4 +45,11 @@ public class PatientDAO extends BaseDAO<Integer, Patient> implements IPatientDAO
 		return criteria.list();
 	}
 
+	@Override
+	public Patient findByCode(String code) {
+		Criteria criteria = createEntityCriteria()
+				.add(Restrictions.eq("code", code));
+		return (Patient) criteria.uniqueResult();
+	}
+
 }

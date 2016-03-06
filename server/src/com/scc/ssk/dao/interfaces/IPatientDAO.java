@@ -6,6 +6,7 @@ import com.scc.ssk.model.Patient;
 
 public interface IPatientDAO {
 	Patient findById(Integer id);
+	Patient findByCode(String code);
 	List<Patient> findByDoctorId(Integer id);
 	List<Patient> findAll();
 	void store(Patient candidate);

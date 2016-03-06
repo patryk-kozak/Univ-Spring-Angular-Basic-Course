@@ -50,7 +50,7 @@ public class Patient implements Serializable {
 	@Column(name = "lastName", nullable = false)
 	private String lastName;
 	
-	@Column(name = "patientCode", nullable = false)
+	@Column(name = "patientCode", unique = true, nullable = false)
 	private String code;
 	
 	@Temporal(TemporalType.TIMESTAMP)

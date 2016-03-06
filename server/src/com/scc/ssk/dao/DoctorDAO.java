@@ -3,6 +3,7 @@ package com.scc.ssk.dao;
 import java.util.List;
 
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.scc.ssk.dao.interfaces.IDoctorDAO;
@@ -37,5 +38,12 @@ public class DoctorDAO extends BaseDAO<Integer, Doctor> implements IDoctorDAO {
 	public void update(Doctor candidate)
 	{
 		update(candidate);
+	}
+
+	@Override
+	public Doctor findByCode(String code) {
+		Criteria criteria = createEntityCriteria()
+				.add(Restrictions.eq("code", code));
+		return (Doctor) criteria.uniqueResult();
 	}
 }

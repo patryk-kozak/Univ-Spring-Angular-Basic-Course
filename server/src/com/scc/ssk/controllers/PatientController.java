@@ -47,5 +47,4 @@ public class PatientController {
 	{
 		return new ResponseEntity<List<Patient>>(patientService.findByDoctorId(doctorId), HttpStatus.OK);
 	}
-	
 }
