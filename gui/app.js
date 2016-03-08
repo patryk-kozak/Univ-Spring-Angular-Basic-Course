@@ -1,114 +1,113 @@
 var app = angular.module('clinicApp', ["ui.router"]);
-
-// ***
-// Constants
-// ***
-app
-    .constant('USER_ROLES',
-        {
-            all: '*',
-            admin: 'admin',
-            doctor: 'doctor',
-            patient: 'patient'
-        }
-        )
-    .constant('AUTH_STATUS',
-        {
-            loginSuccess: 'login_success',
-            loginFailed: 'login_failed',
-            logoutSuccess: 'logout_success',
-            sessionTimeout: 'session_timeout',
-            notAuthenticated: 'not_authenticated',
-            notAuthorized: 'not_authorized'
-        }
-        )
+   
 // ***
 // Routing
 // ***
 app
-    .config(function ($stateProvider, $urlRouterProvider, USER_ROLES) {
+    .config(function ($stateProvider, $urlRouterProvider) {
 
-        $urlRouterProvider.otherwise("/login");
+        $urlRouterProvider.otherwise("/404");
 
+        // for error handling
         $stateProvider
-            .state('404',
+            .state('error', {
+                abstract: true,
+                template: "<ui-view/>",
+                data: {
+                    access: "*"
+                }
+            })
+            .state('error.404', {
+                url: '/404',
+                templateUrl: 'templates/404.html'
+            })
+            .state('error.403', {
+                url: '/403',
+                templateUrl: 'templates/403.html'
+            })
+            .state('error.401', {
+                url: '/401',
+                templateUrl: 'templates/401.html'
+            })
+
+        // for unauthorized users
+        $stateProvider
+            .state('all', {
+                abstract: true,
+                template: "<ui-view/>",
+                data: {
+                    access: "*"
+                }
+            })
+            .state('all.login', {
+                url: '/login',
+                templateUrl: 'templates/login.html',
+                controller: 'sessionCtrl'
+            })
+            .state('all.home', {
+                url: '/',
+                templateUrl: 'templates/home.html',
+            });
+        
+        // for authorized users
+        $stateProvider
+            .state('user', {
+                abstract: true,
+                template: "<ui-view/>",
+                data:
                 {
-                    url: "/404",
-                    templateUrl: "templates/404.html",
-                    data:
-                    {
-                        authorizedRoles: [USER_ROLES.all]
-                    }
-                })
-            .state('login',
-                {
-                    url: "/login",
-                    templateUrl: "templates/login.html",
-                    data:
-                    {
-                        authorizedRoles: [USER_ROLES.all]
-                    }
-                })
-            .state('logout',
-                {
-                    url: "/logout",
-                    templateUrl: "templates/logout.html",
-                    data:
-                    {
-                        authorizedRoles: [USER_ROLES.admin, USER_ROLES.doctor, USER_ROLES.patient]
-                    }
-                })
-            .state('dashboard',
+                    access: "user"
+                }
+            })
+            .state('user.dashboard',
                 {
                     url: "/dashboard",
                     templateUrl: "templates/dashboard.html",
-                    data:
-                    {
-                        authorizedRoles: [USER_ROLES.admin, USER_ROLES.doctor, USER_ROLES.patient]
-                    }
                 })
-            .state('doctors',
+            .state('user.visits',
+                {
+                    url: "/visits",
+                    templateUrl: "templates/visits.html",
+                }
+                )
+        // for higher access - rights users
+            .state('user.doctors',
                 {
                     url: "/doctors",
                     templateUrl: "templates/doctors.html",
                     data:
                     {
-                        authorizedRoles: [USER_ROLES.admin]
+                        access: "admin"
                     }
                 })
-            .state('patients',
+            .state('user.patients',
                 {
                     url: "/patients",
                     templateUrl: "templates/patients.html",
                     data:
                     {
-                        authorizedRoles: [USER_ROLES.admin, USER_ROLES.doctor]
+                        access: "doctor"
                     }
                 })
-            .state('visits',
-                {
-                    url: "/visits",
-                    templateUrl: "templates/visits.html",
-                    data:
-                    {
-                        authorizedRoles: [USER_ROLES.doctor, USER_ROLES.patient]
+
+    });
+
+app
+    .run(function ($rootScope, $state, Auth) {
+
+        $rootScope.$on("$stateChangeStart",
+            function (event, toState, toParams,
+                fromState, fromParams) {
+                console.log(fromState.name + " >>>>>> " + toState.name);
+
+                if (toState.data.access != "*") {
+
+                    if (!Auth.isAuthenticated()) {
+                        $rootScope.error = null;
+                        $state.go('all.login');
+                        $rootScope.error = "Access denied";
+                        console.log("Access denied");
                     }
                 }
-                )
-    });
-    
-// ***
-// $rootScope
-// ***
-
-$rootScope.$on('$stateChangeStart', function (event, next) {
-    var authorizedRoles = next.data.authorizedRoles;
-    if (!authService.isAuthorized(authorizedRoles)) {
-        event.preventDefault();
-        if (Auth.isAuthenticated()) {
-            $rootScope.$broadcast(AUTH_STATUS.notAuthorized);
-        } else {
-            $rootScope.$broadcast(AUTH_STATUS.notAuthenticated);
-        }
-    }
-})
+            });
+    })

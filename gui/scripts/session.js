@@ -1,15 +1,18 @@
-angular.module('clinicApp').service('session', function ($rootScope, USER_ROLES) {
+var app = angular.module('clinicApp');
 
-    this.create = function (user) {
-        this.user = user;
-        this.userRole = user.userRole;
+app.service('session', function ($rootScope) {
+
+    var service = {};
+    service.user = {};
+    
+    service.create = function (user) {
+        service.user = user;
+        $rootScope.user = user;
     };
 
-    this.destroy = function () {
-        this.user = null;
-        this.userRole = null;
+    service.destroy = function () {
+        service.user = null;
+        $rootScope.user = null;
     };
-
-
-    return this;
+    return service;
 });

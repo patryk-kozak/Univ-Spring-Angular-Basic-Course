@@ -1,12 +1,14 @@
 var clinicWS = "http://localhost:8080/SSK/";
+var app = angular.module('clinicApp');
 
-angular.module('clinicApp')
-    .factory("authService", ['$http', '$rootScope', '$window', 'errorService', 'session', 'AUTH_STATUS',
-        function ($http, $rootScope, $window, errorService, session, AUTH_STATUS) {
+app
+    .factory("Auth", ['$http', '$state', '$rootScope', '$window', 'errorService', 'session',
+        function ($http, $state, $rootScope, $window, errorService, session) {
+            var service = {};
 
             service.login = function (code, isDoctor) {
                 if (code != null) {
-                    $http.get(clinicWS + "/auth/" + code +  "/" + isDoctor)
+                    $http.get(clinicWS + "auth/" + code + "/" + isDoctor)
                         .then(onLogin, onLoginError);
                 }
                 else {
@@ -15,8 +17,8 @@ angular.module('clinicApp')
             }
 
             var onLogin = function (response) {
-                var user = response.data[0];
-                session.create(user);
+                session.create(response.data);
+                $state.go('user.dashboard');
             }
 
             var onLoginError = function () {
@@ -24,21 +26,19 @@ angular.module('clinicApp')
             }
 
             service.logout = function () {
-                session.destroy()
+                session.destroy();
+                $state.go('all.login');
             }
 
-            service.isAuthorized = function (roles) {
-                var result = false;
-                angular.forEach(roles, function (value, key) {
-                    if (value == session.userRole) {
-                        result = true;
-                    }
-                })
-                return result;
+            service.isAuthorized = function (access) {
+                if (access != "*") {
+                    return true;
+                }
+                return false;
             }
 
             service.isAuthenticated = function () {
-                return session.userRole != null && session.user != null;
+                return session.user != null;
             }
 
             return service;
